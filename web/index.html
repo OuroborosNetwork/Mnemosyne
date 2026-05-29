@@ -37,201 +37,7 @@
   }
 </script>
 
-<style>
-  html { scroll-behavior: smooth; }
-  body {
-    background: linear-gradient(180deg, #0d0a07 0%, #1a1612 100%);
-    color: #f5ecd9;
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-  }
-  .font-classical { letter-spacing: 0.05em; }
-  .text-glow {
-    text-shadow: 0 0 30px rgba(184, 134, 11, 0.4);
-  }
-  .card {
-    background: rgba(42, 37, 32, 0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(184, 134, 11, 0.2);
-    transition: all 0.3s ease;
-  }
-  .card:hover {
-    border-color: rgba(184, 134, 11, 0.5);
-    background: rgba(42, 37, 32, 0.85);
-  }
-  .greek-divider {
-    background: linear-gradient(90deg, transparent 0%, rgba(184, 134, 11, 0.5) 50%, transparent 100%);
-    height: 1px;
-  }
-  .glyph {
-    font-family: 'Cinzel', serif;
-    color: #b8860b;
-  }
-  code {
-    background: rgba(13, 10, 7, 0.6);
-    padding: 0.125rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-    color: #d4a04a;
-  }
-  pre code { padding: 0; background: transparent; color: inherit; }
-  pre {
-    background: rgba(13, 10, 7, 0.8);
-    border: 1px solid rgba(184, 134, 11, 0.2);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    overflow-x: auto;
-    font-size: 0.85rem;
-  }
-  .mode-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem; height: 2.5rem;
-    border-radius: 50%;
-    font-family: 'Cinzel', serif;
-    font-weight: 600;
-    border: 2px solid #b8860b;
-    color: #b8860b;
-    background: rgba(184, 134, 11, 0.1);
-  }
-  .layer-block {
-    background: rgba(42, 37, 32, 0.5);
-    border-left: 3px solid #b8860b;
-    padding: 1rem 1.5rem;
-    margin: 0.5rem 0;
-  }
-  .pill {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: rgba(184, 134, 11, 0.15);
-    color: #d4a04a;
-    border: 1px solid rgba(184, 134, 11, 0.3);
-  }
-  .pill-warn {
-    background: rgba(220, 100, 50, 0.15);
-    color: #e89a6f;
-    border-color: rgba(220, 100, 50, 0.3);
-  }
-  .pill-good {
-    background: rgba(100, 180, 100, 0.15);
-    color: #8fd18f;
-    border-color: rgba(100, 180, 100, 0.3);
-  }
-  nav a:hover { color: #b8860b; }
-  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-  th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid rgba(184, 134, 11, 0.15); }
-  th { color: #d4a04a; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  td { font-size: 0.92rem; }
-  details summary { cursor: pointer; padding: 0.5rem 0; color: #d4a04a; font-weight: 500; }
-  details summary:hover { color: #b8860b; }
-
-  /* StoaChain™ branded mention — always bold golden */
-  .stoachain {
-    color: #d4a04a;
-    font-weight: 700;
-  }
-  .stoachain::after {
-    content: '™';
-    font-size: 0.65em;
-    vertical-align: super;
-    margin-left: 1px;
-    color: #d4a04a;
-  }
-
-  /* Ouronet™ branded mention — always bold blue */
-  .ouronet {
-    color: #5b8ec2;
-    font-weight: 700;
-  }
-  .ouronet::after {
-    content: '™';
-    font-size: 0.65em;
-    vertical-align: super;
-    margin-left: 1px;
-    color: #5b8ec2;
-  }
-
-  /* Sidebar info block */
-  .sidebar {
-    background: rgba(184, 134, 11, 0.08);
-    border-left: 4px solid #b8860b;
-    border-radius: 0 0.5rem 0.5rem 0;
-    padding: 1.25rem 1.5rem;
-    margin: 1rem 0;
-  }
-  .sidebar-title {
-    color: #d4a04a;
-    font-family: 'Cinzel', serif;
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.05em;
-  }
-
-  /* OS key combo display */
-  kbd {
-    display: inline-block;
-    padding: 0.15rem 0.45rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-    background: rgba(13, 10, 7, 0.8);
-    border: 1px solid rgba(184, 134, 11, 0.4);
-    border-radius: 0.25rem;
-    color: #d4a04a;
-    margin: 0 0.1rem;
-  }
-
-  /* ─── Hero Codex Identity display with braces ─── */
-  .identity-display {
-    display: inline-block;
-    margin: 0 auto;
-  }
-  .identity-glyphs {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.6rem;
-    color: #d4a04a;
-    letter-spacing: 0.06em;
-    line-height: 1.3;
-    display: block;
-    text-shadow: 0 0 25px rgba(184, 134, 11, 0.5);
-  }
-  @media (min-width: 768px) {
-    .identity-glyphs { font-size: 2rem; }
-  }
-  .identity-braces {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 0.75rem;
-  }
-  .brace-section {
-    text-align: center;
-  }
-  .brace-u {
-    border-left: 2px solid #b8860b;
-    border-right: 2px solid #b8860b;
-    border-bottom: 2px solid #b8860b;
-    border-radius: 0 0 14px 14px;
-    height: 12px;
-    margin: 0 4px 0.5rem 4px;
-  }
-  .brace-label {
-    font-size: 0.78rem;
-    color: rgba(245, 236, 217, 0.7);
-    font-family: 'Inter', sans-serif;
-  }
-  .brace-sublabel {
-    font-size: 0.7rem;
-    color: rgba(245, 236, 217, 0.4);
-    font-family: 'Inter', sans-serif;
-    display: block;
-    margin-top: 0.15rem;
-  }
-</style>
+<link rel="stylesheet" href="/assets/styles.css" />
 </head>
 
 <body>
@@ -239,8 +45,8 @@
 <!-- ──────────────────── NAV ──────────────────── -->
 <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-stoa-deep/80 border-b border-bronze/20">
   <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="#top" class="font-classical text-xl text-bronze">Mnemosyne</a>
-    <div class="hidden md:flex gap-6 text-sm">
+    <a href="#top" class="font-classical text-xl text-bronze"><span class="brand-lambda">ΛΛ</span>nemosyne</a>
+    <div class="hidden md:flex gap-5 text-sm">
       <a href="#what" class="text-parchment/70 transition">What it is</a>
       <a href="#codex" class="text-parchment/70 transition">The Codex</a>
       <a href="#modes" class="text-parchment/70 transition">Four modes</a>
@@ -248,6 +54,7 @@
       <a href="#identity" class="text-parchment/70 transition">Identity</a>
       <a href="#stoictags" class="text-parchment/70 transition">StoicTags</a>
       <a href="#security" class="text-parchment/70 transition">Security</a>
+      <a href="/docs/index.html" class="text-bronze font-semibold transition">Documentation →</a>
     </div>
     <span class="pill">v0.1 design</span>
   </div>
@@ -259,23 +66,37 @@
 
     <!-- Codex Identity display with braces -->
     <div class="identity-display mb-8">
-      <code class="identity-glyphs">₱.мIĂ…óYэ.Π.ПÍ…FgЫ</code>
-      <div class="identity-braces">
+
+      <!-- The address itself: prefixes BIG, payloads small, halves separated by ':' -->
+      <div class="identity-line">
+        <div class="identity-half">
+          <span class="id-prefix">₱.</span><span class="id-payload">мIĂ…óYэ</span>
+        </div>
+        <span class="halves-separator">:</span>
+        <div class="identity-half">
+          <span class="id-prefix">Π.</span><span class="id-payload">ПÍ…FgЫ</span>
+        </div>
+      </div>
+
+      <!-- Braces underneath, aligned column-for-column with the address halves -->
+      <div class="braces-line">
         <div class="brace-section">
           <div class="brace-u"></div>
           <div class="brace-label">Standard half</div>
-          <span class="brace-sublabel">160 glyphs · 1024 bits</span>
+          <span class="brace-sublabel">160 glyphs after the prefix · 1024 bits</span>
         </div>
+        <span></span>
         <div class="brace-section">
           <div class="brace-u"></div>
           <div class="brace-label">Smart half</div>
-          <span class="brace-sublabel">160 glyphs · 1024 bits</span>
+          <span class="brace-sublabel">160 glyphs after the prefix · 1024 bits</span>
         </div>
       </div>
+
     </div>
 
     <h1 class="font-classical text-5xl md:text-7xl mb-6 text-glow text-parchment">
-      Mnemosyne
+      <span class="brand-lambda">ΛΛ</span>nemosyne
     </h1>
     <p class="text-2xl md:text-3xl text-bronze mb-4 font-light">
       The one stop location for your <span class="stoachain">StoaChain</span>/<span class="ouronet">Ouronet</span> Codex Management
@@ -296,6 +117,29 @@
     <p class="mt-8 text-sm text-parchment/40">
       Mnemosyne — Greek goddess of memory, mother of the nine Muses.
     </p>
+
+    <!-- The mother-tongue / human-language pitch -->
+    <div class="mt-10 max-w-3xl mx-auto p-6 border border-bronze/30 rounded-lg bg-bronze/5">
+      <p class="text-parchment text-lg leading-relaxed">
+        Secure your cryptographic vault with seed words composed in
+        <strong class="text-bronze">your own language</strong> — your mother
+        tongue, your dialect, your private vocabulary. The first crypto system
+        that doesn't force you to memorize words from someone else's dictionary.
+      </p>
+      <p class="text-parchment/70 text-sm leading-relaxed mt-3">
+        No fixed English wordlist. No 2048 prescribed nouns. Compose your seed
+        from any glyph in any writing system — Latin, Cyrillic, Greek,
+        diacritics, mathematical symbols, anything that lives in the
+        <a href="/docs/dalos-character-set.html" class="text-bronze hover:text-gold">Dalos
+        Character Set</a>. Memorize a phrase that actually means something to you.
+        Keep your vault in your head.
+      </p>
+      <p class="mt-4 text-sm">
+        <a href="/docs/dalos-character-set.html" class="text-bronze hover:text-gold font-semibold">
+          How free-form seed words work →
+        </a>
+      </p>
+    </div>
   </div>
 </section>
 
@@ -531,7 +375,7 @@
     <div class="grid md:grid-cols-2 gap-6">
 
       <!-- Mode 1 -->
-      <div class="card p-6 rounded-lg">
+      <div class="card p-6 rounded-lg mode-card">
         <div class="flex items-center gap-4 mb-4">
           <div class="mode-badge">Ⅰ</div>
           <div>
@@ -539,12 +383,12 @@
             <p class="text-sm text-parchment/60">Zero personal information, maximum anonymity</p>
           </div>
         </div>
-        <p class="text-parchment/80 text-sm leading-relaxed mb-4">
+        <p class="text-parchment/80 text-sm leading-relaxed mb-4 mode-card-description">
           The base mode. Sign up with a username and password — no email, no phone, no
           tracking. Two unwrap paths: your password (daily) and your Codex Identity seed
           (recovery).
         </p>
-        <table class="text-xs mb-2">
+        <table class="text-xs mb-2 mode-card-table">
           <tr><th>Login</th><td>username + password</td></tr>
           <tr><th>Recovery</th><td>Codex Identity seed</td></tr>
           <tr><th>Custody</th><td><span class="pill pill-good">strict self-custody</span></td></tr>
@@ -553,7 +397,7 @@
       </div>
 
       <!-- Mode 2 -->
-      <div class="card p-6 rounded-lg">
+      <div class="card p-6 rounded-lg mode-card">
         <div class="flex items-center gap-4 mb-4">
           <div class="mode-badge">Ⅱ</div>
           <div>
@@ -561,13 +405,13 @@
             <p class="text-sm text-parchment/60">Sign in with your CodexPrime</p>
           </div>
         </div>
-        <p class="text-parchment/80 text-sm leading-relaxed mb-4">
+        <p class="text-parchment/80 text-sm leading-relaxed mb-4 mode-card-description">
           Adds wallet-signature login. Type your <code>Ѻ.xxx</code> address; sign a
           challenge with your CodexPrime Standard <span class="ouronet">Ouronet</span>
           Account's private key; server verifies. No new password to invent if you don't
           want one. Mode 1's username + password also remains available.
         </p>
-        <table class="text-xs mb-2">
+        <table class="text-xs mb-2 mode-card-table">
           <tr><th>Login</th><td>Mode 1 <em>or</em> Schnorr signature</td></tr>
           <tr><th>Recovery</th><td>Codex Identity seed</td></tr>
           <tr><th>Custody</th><td><span class="pill pill-good">strict self-custody</span></td></tr>
@@ -576,7 +420,7 @@
       </div>
 
       <!-- Mode 3 -->
-      <div class="card p-6 rounded-lg">
+      <div class="card p-6 rounded-lg mode-card">
         <div class="flex items-center gap-4 mb-4">
           <div class="mode-badge">Ⅲ</div>
           <div>
@@ -584,12 +428,12 @@
             <p class="text-sm text-parchment/60">Email reset that actually works</p>
           </div>
         </div>
-        <p class="text-parchment/80 text-sm leading-relaxed mb-4">
+        <p class="text-parchment/80 text-sm leading-relaxed mb-4 mode-card-description">
           Adds email-based password reset. At signup, Mnemosyne emails you a one-shot
           Recovery Email Secret — save it like you'd save any important credential.
           "Forgot password" works for real.
         </p>
-        <table class="text-xs mb-2">
+        <table class="text-xs mb-2 mode-card-table">
           <tr><th>Login</th><td>Mode 1/2 methods</td></tr>
           <tr><th>Recovery</th><td>seed <em>or</em> email magic link + Email Recovery Secret</td></tr>
           <tr><th>Custody</th><td><span class="pill">hybrid (3 user-held paths)</span></td></tr>
@@ -598,7 +442,7 @@
       </div>
 
       <!-- Mode 4 -->
-      <div class="card p-6 rounded-lg">
+      <div class="card p-6 rounded-lg mode-card">
         <div class="flex items-center gap-4 mb-4">
           <div class="mode-badge">Ⅳ</div>
           <div>
@@ -606,14 +450,14 @@
             <p class="text-sm text-parchment/60">Built for non-technical users</p>
           </div>
         </div>
-        <p class="text-parchment/80 text-sm leading-relaxed mb-4">
+        <p class="text-parchment/80 text-sm leading-relaxed mb-4 mode-card-description">
           Adds phone identity, SMS Recovery Secret, and personal facts recovery
           (mother's maiden name, first pet, plus a chosen secret word). The upcoming
           Demiourgos Streaming Platform's onboarding preset uses this with full
           autopilot — a user signs up for streaming, gets a fully-functional Codex as
           a byproduct.
         </p>
-        <table class="text-xs mb-2">
+        <table class="text-xs mb-2 mode-card-table">
           <tr><th>Login</th><td>Mode 1/2 methods</td></tr>
           <tr><th>Recovery</th><td>seed / email / SMS Recovery Secret / facts</td></tr>
           <tr><th>Custody</th><td><span class="pill pill-warn">hybrid, accessibility-leaning</span></td></tr>
@@ -724,7 +568,7 @@
           <span class="text-bronze font-bold">1.</span>
           <div>
             <span class="text-bronze font-semibold">Codex Identity seed</span>
-            — generates your Apollo address (<code>₱.STANDARD.Π.SMART</code>). Autopilot:
+            — generates your Apollo address (<code>₱.STANDARD:Π.SMART</code>). Autopilot:
             24 random Dalos words. Custom: bring your own words, bitstring, bitmap,
             base-10 or base-49 scalar.
           </div>
@@ -883,13 +727,19 @@
       <p class="text-parchment/80 text-sm mb-3">
         Apollo addresses use distinct prefix glyphs: <code>₱.</code> for Standard,
         <code>Π.</code> for Smart. A complete Codex Identity therefore reads
-        <code>₱.STANDARD.Π.SMART</code> — two pubkeys, one identifier, mirroring
+        <code>₱.STANDARD:Π.SMART</code> — two pubkeys, one identifier, mirroring
         <span class="stoachain">StoaChain</span>'s own Standard/Smart account model.
       </p>
-      <p class="text-parchment/60 text-xs">
+      <p class="text-parchment/60 text-xs mb-3">
         Apollo signatures are verified off-chain (in Mnemosyne's web app and backend).
         On-chain signing uses the Stoa-native ED25519 curve via the CodexGuard key.
         The two curves serve different layers and don't compete.
+      </p>
+      <p class="text-xs">
+        Deep dive:
+        <a href="/docs/apollo-curve.html" class="text-bronze hover:text-gold">The Apollo Elliptic Curve →</a>
+        &nbsp;·&nbsp;
+        <a href="/docs/dalos-character-set.html" class="text-bronze hover:text-gold">The Dalos Character Set →</a>
       </p>
     </div>
 
@@ -985,151 +835,46 @@
 
 <div class="greek-divider max-w-3xl mx-auto my-12"></div>
 
-<!-- ──────────────────── STOICTAGS ──────────────────── -->
+<!-- ──────────────────── STOICTAGS (teaser, full content in /docs) ──────────────────── -->
 <section id="stoictags" class="py-20 px-6">
-  <div class="max-w-6xl mx-auto">
+  <div class="max-w-5xl mx-auto">
     <h2 class="font-classical text-3xl md:text-4xl text-bronze mb-4 text-center">StoicTags — human-readable account names</h2>
-    <p class="text-center text-parchment/70 max-w-3xl mx-auto mb-12">
-      Optional convenience: tie a name like <code>§bytales</code> to an
-      <span class="ouronet">Ouronet</span> account address. Lives on the
+    <p class="text-center text-parchment/70 max-w-3xl mx-auto mb-10">
+      Optional convenience: tie a name like <code>§bytales</code> to one of your
+      <span class="ouronet">Ouronet</span> Accounts. Lives on the
       <span class="stoachain">StoaChain</span>. Codex-agnostic — works without
-      Mnemosyne entirely.
+      Mnemosyne entirely. Anyone can register; cost-gated by a STOA fee, no
+      operator gatekeeping.
     </p>
 
-    <!-- Layering explanation sidebar -->
-    <div class="sidebar max-w-4xl mx-auto mb-8">
-      <div class="sidebar-title">How a StoicTag sits in the stack</div>
-      <p class="text-parchment/80 text-sm mb-4">
-        A StoicTag is a human-readable handle at the top of a three-layer stack:
-      </p>
-      <div class="space-y-3 text-sm">
-        <div class="flex items-start gap-3">
-          <code class="shrink-0" style="min-width: 7rem">§bytales</code>
-          <div>
-            <span class="text-bronze">StoicTag</span> — what a human types or shares.
-            Resolves to an <span class="ouronet">Ouronet</span> account address.
-          </div>
-        </div>
-        <div class="flex items-start gap-3">
-          <code class="shrink-0" style="min-width: 7rem">Ѻ.xxx</code>
-          <div>
-            <span class="ouronet">Ouronet</span> account — Standard or Smart. The
-            account the StoicTag binds to. Has its own logic, guards, and (for Smart
-            accounts) multi-branch authorization.
-          </div>
-        </div>
-        <div class="flex items-start gap-3">
-          <code class="shrink-0" style="min-width: 7rem">k:abc…</code>
-          <div>
-            <span class="stoachain">StoaChain</span> Payment Key — the underlying
-            <code>k:</code> account that pays the gas. Every
-            <span class="ouronet">Ouronet</span> account has one of these as its
-            Payment Key. This is the actual on-chain entity that signs and pays.
-          </div>
-        </div>
+    <div class="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+      <div class="card p-5 rounded text-center">
+        <div class="glyph text-2xl mb-2">§</div>
+        <p class="text-sm text-parchment/80">
+          <strong>One per <span class="ouronet">Ouronet</span> Account</strong> — strict bijection enforced on chain
+        </p>
       </div>
-      <p class="text-parchment/60 text-xs mt-4">
-        Resolution order at the chain level: StoicTag → <span class="ouronet">Ouronet</span>
-        account → Payment Key (<span class="stoachain">StoaChain</span> account). All
-        three layers visible; each layer's authorization rules apply at its own layer.
-      </p>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-6 mb-8">
-      <div class="card p-6 rounded-lg">
-        <h3 class="font-classical text-xl text-bronze mb-3">How it works</h3>
-        <ul class="space-y-2 text-sm text-parchment/80">
-          <li><span class="text-bronze">•</span> Pick any name (3–256 glyphs from the Dalos character set)</li>
-          <li><span class="text-bronze">•</span> Pay a <span class="stoachain">StoaChain</span> fee (spam-gate, no operator gatekeeping)</li>
-          <li><span class="text-bronze">•</span> Sign with the account's keys (proves ownership)</li>
-          <li><span class="text-bronze">•</span> Name registered on chain, resolvable by anyone</li>
-        </ul>
+      <div class="card p-5 rounded text-center">
+        <div class="glyph text-2xl mb-2">𝔸</div>
+        <p class="text-sm text-parchment/80">
+          <strong>Any Dalos glyph</strong>, 3–256 in length — your name in your language
+        </p>
       </div>
-      <div class="card p-6 rounded-lg">
-        <h3 class="font-classical text-xl text-bronze mb-3">Properties</h3>
-        <ul class="space-y-2 text-sm text-parchment/80">
-          <li><span class="text-bronze">•</span> One StoicTag per account; one account per StoicTag (bijection)</li>
-          <li><span class="text-bronze">•</span> Account must be activated on <span class="stoachain">StoaChain</span> at registration</li>
-          <li><span class="text-bronze">•</span> Single glyph <code>§</code> works for both Standard and Smart accounts</li>
-          <li><span class="text-bronze">•</span> Releasable by the current account owner (frees the name)</li>
-        </ul>
+      <div class="card p-5 rounded text-center">
+        <div class="glyph text-2xl mb-2">↻</div>
+        <p class="text-sm text-parchment/80">
+          <strong>Releasable</strong> by the current account owner — frees the name for re-registration
+        </p>
       </div>
     </div>
 
-    <!-- Character set sidebar -->
-    <div class="sidebar max-w-4xl mx-auto mb-8">
-      <div class="sidebar-title">StoicTag character set and length</div>
-      <p class="text-parchment/80 text-sm mb-3">
-        StoicTags accept <strong>any glyph from the Dalos character set</strong> — the
-        same 256-glyph alphabet that powers Codex Identity seed words. This means
-        StoicTags can be as expressive or as conventional as you want:
-      </p>
-      <ul class="space-y-2 text-sm text-parchment/80 mb-3 ml-4">
-        <li><span class="text-bronze">•</span> <code>§bytales</code> — conventional, lowercase Latin</li>
-        <li><span class="text-bronze">•</span> <code>§мiha1</code> — mixed scripts</li>
-        <li><span class="text-bronze">•</span> <code>§ΣyzantiumImperialPalaceArchives.AD867</code> — long, descriptive, unique</li>
-        <li><span class="text-bronze">•</span> <code>§ŻЪłΘ̃ψøŔд₿αжWòŠ…</code> — maximally obscure if uniqueness matters more than memorability</li>
-      </ul>
-      <p class="text-parchment/80 text-sm mb-3">
-        Length: <strong>3 glyphs minimum, 256 glyphs maximum</strong>. The 3-glyph floor
-        reserves the absolute-shortest namespace for things like protocol-reserved
-        names. The 256-glyph ceiling matches the Codex Identity per-word maximum and
-        gives users a wide creative space without making the on-chain row gigantic.
-      </p>
-      <p class="text-parchment/60 text-xs">
-        StoicTags are case-sensitive at the glyph level. <code>§bytales</code> and
-        <code>§Bytales</code> are distinct registrable names.
-      </p>
-    </div>
-
-    <!-- How to type § -->
-    <div class="sidebar max-w-4xl mx-auto mb-8">
-      <div class="sidebar-title">Typing the StoicTag glyph (§)</div>
-      <p class="text-parchment/80 text-sm mb-4">
-        The <code>§</code> glyph (the section sign, Unicode U+00A7) is on every modern
-        operating system, but the input method varies:
-      </p>
-      <ul class="space-y-2 text-sm text-parchment/80">
-        <li>
-          <strong class="text-bronze">Windows:</strong>
-          hold <kbd>Alt</kbd> and type <kbd>0167</kbd> on the numpad, then release
-          <kbd>Alt</kbd>.
-        </li>
-        <li>
-          <strong class="text-bronze">macOS:</strong>
-          <kbd>⌥</kbd> + <kbd>6</kbd> (Option + 6).
-        </li>
-        <li>
-          <strong class="text-bronze">Linux (X11/Wayland):</strong>
-          <kbd>Compose</kbd> + <kbd>s</kbd> + <kbd>o</kbd>, or
-          <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>u</kbd> then type
-          <kbd>00a7</kbd> and press <kbd>Enter</kbd>.
-        </li>
-        <li>
-          <strong class="text-bronze">iOS / Android:</strong>
-          open the symbol keyboard; long-press the symbol panel until
-          <code>§</code> appears.
-        </li>
-        <li>
-          <strong class="text-bronze">European keyboard layouts:</strong>
-          Italian, Nordic, and several others have <code>§</code> as a direct key
-          (often <kbd>Shift</kbd> + a number row key).
-        </li>
-      </ul>
-      <p class="text-parchment/60 text-xs mt-3">
-        Most users will rarely type StoicTags by hand — Codex Consumers offer
-        click-to-pick selectors. The above is for when you do need to type one.
-      </p>
-    </div>
-
-    <div class="card p-6 rounded-lg max-w-4xl mx-auto">
-      <h4 class="font-classical text-xl text-bronze mb-3">Why "StoicTag"?</h4>
-      <p class="text-parchment/80 text-sm">
-        StoicTags are the <span class="stoachain">StoaChain</span> ecosystem's
-        human-readable name registry. The terminology and the prefix glyph
-        (<code>§</code>) tie to the philosophical roots of the project — "stoic"
-        carries connotations of permanence, discipline, restraint, properties that
-        fit an immutable on-chain identity claim.
+    <div class="text-center">
+      <a href="/docs/stoictags.html" class="inline-block px-6 py-3 border border-bronze text-bronze rounded hover:bg-bronze hover:text-stoa-deep transition font-semibold">
+        Read the full StoicTags documentation →
+      </a>
+      <p class="text-xs text-parchment/50 mt-3">
+        Three-layer stack (StoicTag → <span class="ouronet">Ouronet</span> Account → Payment Key) ·
+        Character set details · Typing <code>§</code> per OS · Pact module reference
       </p>
     </div>
   </div>
@@ -1270,8 +1015,8 @@
 <!-- ──────────────────── FOOTER ──────────────────── -->
 <footer class="py-12 px-6 border-t border-bronze/20 bg-stoa-deep">
   <div class="max-w-6xl mx-auto text-center">
-    <div class="glyph text-3xl mb-4">₱</div>
-    <p class="font-classical text-xl text-bronze mb-2">Mnemosyne</p>
+    <div class="glyph text-3xl mb-4">ΛΛ</div>
+    <p class="font-classical text-xl text-bronze mb-2"><span class="brand-lambda">ΛΛ</span>nemosyne</p>
     <p class="text-sm text-parchment/60 mb-6">
       Part of the <span class="stoachain">StoaChain</span>/<span class="ouronet">Ouronet</span> ecosystem.
       Built by <a href="https://ancientholdings.eu" class="text-bronze hover:text-gold transition">AncientHoldings GmbH</a>.
