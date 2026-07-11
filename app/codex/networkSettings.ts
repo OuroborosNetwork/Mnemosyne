@@ -19,25 +19,25 @@ import {
   createConnectionResolver,
   createPythiaConnection,
   type NetworkSettingsModel,
-} from "@ancientpantheon/codex-core";
+} from "@ancientpantheon/codex";
 import {
   createStoaChainConnection,
   STOACHAIN_DEFAULT_NODE_URL,
-} from "@ancientpantheon/codex-ouronet/connection";
-// NOTE: `createArweaveConnection` lives in codex-arweave/src/connection but is NOT
-// in the package's public `exports` map (the playground reached it via a Vite
-// source-alias that bypasses exports; Next/webpack enforces the map). The Arweave
-// path is also not yet verified for Mnemosyne, so the Arweave row surfaces as an
-// editable, not-connected endpoint (local override left undefined) — the Network
-// tab still renders both chains. ARWEAVE_CHAIN_ID is publicly exported.
-import { ARWEAVE_CHAIN_ID } from "@ancientpantheon/codex-arweave/address-book";
-
+} from "@ancientpantheon/codex/ouronet";
 import { effectivePythiaUrl } from "@/lib/pythiaUrl";
 export { fetchOperatorPythiaUrl } from "@/lib/pythiaUrl";
 
 /** The StoaChain connection chain id (matches createStoaChainConnection). */
 export const STOACHAIN_CHAIN_ID = "stoachain" as const;
-export { ARWEAVE_CHAIN_ID };
+
+// ARWEAVE_CHAIN_ID is the stable literal "arweave" (codex-arweave). We INLINE it
+// rather than `import { ARWEAVE_CHAIN_ID } from "@ancientpantheon/codex/arweave"`
+// because that aggregate barrel also re-exports the Node-only sqlite address-book
+// adapter, which webpack drags into the client component's server trace and fails
+// on `Can't resolve 'sqlite'`. The Arweave path is unverified in Mnemosyne anyway
+// (local override left undefined below), so a value-identical inline is safe and
+// keeps the Node-only arweave adapter out of the browser bundle.
+export const ARWEAVE_CHAIN_ID = "arweave" as const;
 
 /** Arweave gateway default — local/testnet, NEVER mainnet arweave.net. */
 export const DEFAULT_GATEWAY_URL = "http://localhost:1984" as const;

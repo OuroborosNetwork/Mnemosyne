@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactElement } from "react";
-import { useCodexAuth } from "@ancientpantheon/codex-ouronet/hooks";
+import { useCodexAuth } from "@ancientpantheon/codex/hooks";
 
 /**
  * Mode-1 unlock screen for the mounted Codex.

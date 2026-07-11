@@ -12,11 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ancientpantheon/arweave-core": "file:../../AncientPantheon/Codex/packages/arweave-core",
-    "@ancientpantheon/codex-arweave": "file:../../AncientPantheon/Codex/packages/codex-arweave",
-    "@ancientpantheon/codex-core": "file:../../AncientPantheon/Codex/packages/codex-core",
-    "@ancientpantheon/codex-ouronet": "file:../../AncientPantheon/Codex/packages/codex-ouronet",
-    "@ancientpantheon/codex-ui": "file:../../AncientPantheon/Codex/packages/codex-ui",
+    "@ancientpantheon/codex": "^0.5.0",
     "@ardrive/turbo-sdk": "^1.42.0",
     "@codemirror/autocomplete": "^6.18.0",
     "@codemirror/language": "^6.12.1",

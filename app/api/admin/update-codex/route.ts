@@ -10,10 +10,10 @@ const NO_STORE = { "Cache-Control": "no-store" } as const;
 
 /**
  * Ancient-gated "Update Codex" action. `401` unauthenticated, `403` non-ancient.
- * For an ancient it runs the bounded local rebuild (re-links the `file:` codex
- * packages) and returns the exit code + captured output. It never restarts the
- * running server (that would end this admin session). The version-advance/redeploy
- * behavior is Phase 6 — see {@link runCodexRebuild}.
+ * For an ancient it pulls the latest `@ancientpantheon/codex` from npm and returns
+ * the exit code + captured output + the before/after version delta. It never
+ * restarts the running server (that would end this admin session) — see
+ * {@link runCodexRebuild}.
  */
 export async function POST(request: NextRequest) {
   const gate = await requireAncient(request);

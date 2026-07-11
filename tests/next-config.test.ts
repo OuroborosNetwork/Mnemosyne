@@ -30,12 +30,9 @@ function invoke(isServer: boolean): Cfg {
 }
 
 describe("next.config bundler seam", () => {
-  it("transpiles all nine out-of-root Codex/stoachain/noble sources so their TS/JSX is compiled", () => {
+  it("transpiles the codex aggregate + its peer chain primitives so their TS/JSX is compiled", () => {
     const expected = [
-      "@ancientpantheon/codex-core",
-      "@ancientpantheon/codex-ui",
-      "@ancientpantheon/codex-ouronet",
-      "@ancientpantheon/codex-arweave",
+      "@ancientpantheon/codex",
       "@ancientpantheon/arweave-core",
       "@stoachain/stoa-core",
       "@stoachain/kadena-stoic-legacy",

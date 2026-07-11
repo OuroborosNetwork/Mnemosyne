@@ -1,9 +1,9 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-// The Codex tree is consumed from FIVE `file:`-linked `@ancientpantheon/*`
-// packages plus the four `@stoachain/*` chain primitives and `@noble/curves`, all
-// out-of-root under the sibling AncientPantheon/Codex checkout. This config is the
+// The Codex tree is consumed from the single npm `@ancientpantheon/codex`
+// aggregate (which bundles codex-core/ui/ouronet/arweave and externalizes the
+// four `@stoachain/*` chain primitives + `@noble/curves` as peer deps). This config is the
 // webpack translation of the Codex playground's proven Vite recipe
 // (apps/codex-playground/vite.config.ts + resolve.shared.ts): force a single
 // react/react-dom/zustand/@noble/curves instance, and supply the browser shims the
@@ -44,14 +44,12 @@ const turboWeb = toAbs("@ardrive", "turbo-sdk", "lib", "esm", "web", "index.js")
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // All nine out-of-root sources must be transpiled: the 5 file:-linked
-  // @ancientpantheon/* packages (some ship TS/JSX src) + the four @stoachain/*
-  // primitives + @noble/curves.
+  // Out-of-root sources that must be transpiled: the single bundled
+  // `@ancientpantheon/codex` aggregate (npm) + its external `arweave-core`, plus
+  // the aggregate's peer chain primitives — the four `@stoachain/*` + `@noble/curves`
+  // (the aggregate externalizes these, so the consumer supplies + transpiles them).
   transpilePackages: [
-    "@ancientpantheon/codex-core",
-    "@ancientpantheon/codex-ui",
-    "@ancientpantheon/codex-ouronet",
-    "@ancientpantheon/codex-arweave",
+    "@ancientpantheon/codex",
     "@ancientpantheon/arweave-core",
     "@stoachain/stoa-core",
     "@stoachain/kadena-stoic-legacy",

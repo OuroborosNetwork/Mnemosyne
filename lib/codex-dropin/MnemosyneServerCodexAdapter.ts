@@ -1,7 +1,7 @@
 /**
- * MnemosyneServerCodexAdapter — the @ancientpantheon/codex-ouronet CodexAdapter
- * that persists Mnemosyne's OWN operator codex SERVER-SIDE (master-key sealed)
- * instead of browser localStorage.
+ * MnemosyneServerCodexAdapter — the @ancientpantheon/codex CodexAdapter that
+ * persists Mnemosyne's OWN operator codex SERVER-SIDE (master-key sealed) instead
+ * of browser localStorage.
  *
  * Ported from AncientHoldings' HubServerCodexAdapter. Runs in the browser (the
  * package's CodexProvider only calls the adapter client-side). Every write
@@ -21,11 +21,11 @@
  * flows straight back through saveAll → the sealed store. No upload, ever.
  */
 
-import { emptySnapshot } from "@ancientpantheon/codex-ouronet/adapters";
+import { emptySnapshot } from "@ancientpantheon/codex/ouronet";
 import type {
   CodexAdapter,
   CodexSnapshot,
-} from "@ancientpantheon/codex-ouronet/adapters";
+} from "@ancientpantheon/codex/ouronet";
 import type {
   IStoaChainSeed,
   IOuroAccount,
@@ -36,7 +36,7 @@ import type {
   IConsumerSettings,
   ICodexIdentity,
   DeviceVariant,
-} from "@ancientpantheon/codex-ouronet/types";
+} from "@ancientpantheon/codex/ouronet";
 
 /** The ancient-gated sealed-snapshot plane (GET → backup, POST { backup }, DELETE). */
 const SNAPSHOT_URL = "/api/admin/codex";

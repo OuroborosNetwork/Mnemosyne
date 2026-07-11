@@ -36,14 +36,14 @@ import {
   type ReactNode,
 } from "react";
 
-import { CodexProvider, useCodexStore } from "@ancientpantheon/codex-ouronet/provider";
+import { CodexProvider, useCodexStore } from "@ancientpantheon/codex/provider";
 import {
   CodexUiRoot,
   CodexTabs,
   CodexSettingsSection,
   CodexDebouncerPanel,
-} from "@ancientpantheon/codex-ouronet/ui";
-import type { NetworkSettingsModel } from "@ancientpantheon/codex-core";
+} from "@ancientpantheon/codex/ui";
+import type { NetworkSettingsModel } from "@ancientpantheon/codex";
 
 import {
   loadNetworkSettings,
@@ -57,13 +57,13 @@ import {
 import {
   ObservationalCodexIdDisplay,
   CodexPasswordPrompt,
-} from "@ancientpantheon/codex-ui/ui";
+} from "@ancientpantheon/codex/ui";
 import {
   useCodex,
   useCodexAuth,
   useCodexBackup,
-} from "@ancientpantheon/codex-ouronet/hooks";
-import { MemoryCodexAdapter } from "@ancientpantheon/codex-ouronet/adapters";
+} from "@ancientpantheon/codex/hooks";
+import { MemoryCodexAdapter } from "@ancientpantheon/codex/ouronet";
 
 import { UnlockScreen } from "./UnlockScreen";
 import "./app.css";

@@ -2,9 +2,9 @@ name: Deploy Mnemosyne (Next app) to codex.ancientholdings.eu
 
 # Mnemosyne v0.1+ — Next.js app auto-deploy (SUPERSEDES the old static web/ rsync).
 #
-# Builds the SELF-CONTAINED Next `output: "standalone"` bundle (which bundles the
-# file:-linked @ancientpantheon/codex-* packages into the app chunks — no Codex
-# repo needed on the server), rsyncs it to the VPS, and reloads the pm2 process.
+# The Codex is consumed as the single published npm package `@ancientpantheon/codex`
+# (`npm ci` pulls it — no Codex repo checkout needed). Builds the SELF-CONTAINED
+# Next `output: "standalone"` bundle, rsyncs it to the VPS, reloads the pm2 process.
 # nginx reverse-proxies codex.ancientholdings.eu -> 127.0.0.1:3005 (one-time VPS
 # setup: see deploy/RUNBOOK.md). Runtime secrets (OIDC creds, SESSION_SECRET) live
 # in the SERVER's /var/www/codex.ancientholdings.eu/.env.local — NOT in CI.
@@ -12,8 +12,6 @@ name: Deploy Mnemosyne (Next app) to codex.ancientholdings.eu
 # Required GitHub secrets:
 #   DEPLOY_SSH_KEY    — private half of the mnemosyne_deploy_ed25519 keypair (VPS root)
 #   DEPLOY_HOST       — the VPS IP (85.215.141.198)
-#   CODEX_REPO_TOKEN  — a PAT with READ access to AncientPantheon/Codex (private),
-#                       so CI can check the codex packages out to build the bundle.
 
 on:
   push:
@@ -26,36 +24,20 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      # Lay the two repos out at the SAME relative paths the file: links expect:
-      # Mnemosyne's package.json points at `../../AncientPantheon/Codex/packages/*`,
-      # so from _Claude/StoaOuronet/Mnemosyne that resolves to _Claude/AncientPantheon/Codex.
       - name: Checkout Mnemosyne
         uses: actions/checkout@v4
         with:
           path: _Claude/StoaOuronet/Mnemosyne
-
-      - name: Checkout Codex packages (private)
-        uses: actions/checkout@v4
-        with:
-          repository: AncientPantheon/Codex
-          token: ${{ secrets.CODEX_REPO_TOKEN }}
-          path: _Claude/AncientPantheon/Codex
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Build the Codex packages (produces dist the file: links resolve to)
-        working-directory: _Claude/AncientPantheon/Codex
-        run: |
-          npm ci
-          npm run build
-
       - name: Build Mnemosyne (standalone)
         working-directory: _Claude/StoaOuronet/Mnemosyne
         run: |
-          npm ci
+          npm ci   # pulls @ancientpantheon/codex + deps from npm
           npm run build   # next build --webpack, output: "standalone"
 
       - name: Assemble the self-contained bundle

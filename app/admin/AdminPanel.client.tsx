@@ -20,6 +20,9 @@ interface RebuildResult {
   stderr: string;
   command: string;
   note: string;
+  versionBefore: string;
+  versionAfter: string;
+  changed: boolean;
 }
 
 function isAncient(me: MeResponse | null): boolean {
@@ -248,7 +251,7 @@ function UpdateCodexSection({ codexVersion }: { codexVersion: string }): ReactEl
     <section className="mnemo-admin-card">
       <h2 className="mnemo-admin-h2">Update Codex</h2>
       <p className="mnemo-admin-muted">
-        Linked <code>@ancientpantheon/codex-ui</code> version:{" "}
+        Installed <code>@ancientpantheon/codex</code> version:{" "}
         <strong>{codexVersion}</strong>
       </p>
       <button
@@ -257,7 +260,7 @@ function UpdateCodexSection({ codexVersion }: { codexVersion: string }): ReactEl
         disabled={busy}
         onClick={() => void run()}
       >
-        {busy ? "Rebuilding…" : "Update Codex"}
+        {busy ? "Pulling latest codex…" : "Update Codex"}
       </button>
       {error ? (
         <p className="mnemo-admin-status" role="alert">
@@ -267,9 +270,19 @@ function UpdateCodexSection({ codexVersion }: { codexVersion: string }): ReactEl
       {result ? (
         <div className="mnemo-admin-result">
           <p className="mnemo-admin-status">
-            {result.ok ? "Rebuild succeeded" : "Rebuild failed"} (exit{" "}
-            {result.exitCode}) · <code>{result.command}</code>
+            {result.ok
+              ? result.changed
+                ? `Pulled codex ${result.versionBefore} → ${result.versionAfter}`
+                : `Already on the latest codex (${result.versionAfter})`
+              : "Codex pull failed"}{" "}
+            (exit {result.exitCode}) · <code>{result.command}</code>
           </p>
+          {result.ok && result.changed ? (
+            <p className="mnemo-admin-muted">
+              Reload to pick up the new build (dev). On the live site, redeploy to
+              rebuild the bundle against the new version.
+            </p>
+          ) : null}
           <p className="mnemo-admin-muted">{result.note}</p>
           {result.stderr ? (
             <pre className="mnemo-admin-log">{result.stderr}</pre>

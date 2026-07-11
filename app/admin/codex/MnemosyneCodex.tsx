@@ -41,19 +41,19 @@ import {
 import {
   CodexProvider,
   useCodexStore,
-} from "@ancientpantheon/codex-ouronet/provider";
+} from "@ancientpantheon/codex/provider";
 import {
   useCodex,
   useCodexAuth,
-} from "@ancientpantheon/codex-ouronet/hooks";
+} from "@ancientpantheon/codex/hooks";
 import {
   CodexUiRoot,
   CodexTabs,
   CodexSettingsSection,
   CodexDebouncerPanel,
-} from "@ancientpantheon/codex-ouronet/ui";
-import { ObservationalCodexIdDisplay } from "@ancientpantheon/codex-ui/ui";
-import type { NetworkSettingsModel } from "@ancientpantheon/codex-core";
+} from "@ancientpantheon/codex/ui";
+import { ObservationalCodexIdDisplay } from "@ancientpantheon/codex/ui";
+import type { NetworkSettingsModel } from "@ancientpantheon/codex";
 
 import { MnemosyneServerCodexAdapter } from "@/lib/codex-dropin/MnemosyneServerCodexAdapter";
 import {

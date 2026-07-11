@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 // Codex shell stylesheet — imported ONCE in the server root layout. It is
 // `.codex-ui`-scoped so it does not bleed into the marketing pages, and
 // codex-ui's `sideEffects: ["**/*.css"]` keeps it from being tree-shaken.
-import "@ancientpantheon/codex-ui/ui.css";
+import "@ancientpantheon/codex/ui.css";
 
 export const metadata = {
   title: "Mnemosyne",
