@@ -1,14 +1,11 @@
 import type { ReactElement } from "react";
 
-import { readCodexUiVersion } from "@/lib/codexVersion";
+import { AdminLanding } from "./AdminLanding.client";
 
-import { AdminPanel } from "./AdminPanel.client";
-
-// The ancient-only admin panel host. This server page reads the installed codex-ui
-// version (a server-side fs read) and hands it to the client panel, which does the
-// live /api/me gate + the interactive controls. The panel is a SHELL: later phases
-// (the Automaton operator-identity section) contribute additional sections into it
-// without re-scaffolding the host.
+// The ancient-only admin landing. A Hub-style host: an ancient-gated list of entry
+// tiles, each linking to its own dedicated sub-page (/admin/pythia, /admin/update-codex,
+// /admin/security, /admin/network, /admin/codex). The gate + interactivity live in the
+// client component; this server page is a thin delegator.
 export default function AdminPage(): ReactElement {
-  return <AdminPanel codexVersion={readCodexUiVersion()} />;
+  return <AdminLanding />;
 }
