@@ -57,7 +57,15 @@ export class MnemosyneServerCodexAdapter implements CodexAdapter {
       cache: "no-store",
     });
     if (!res.ok) {
-      throw new Error(`${this.name}: load failed (HTTP ${res.status})`);
+      // Surface the server's own reason (e.g. "codex storage not ready …") instead
+      // of a bare status, so a misconfigured server is diagnosable from the UI.
+      const detail = await res
+        .json()
+        .then((b: { error?: string }) => b?.error)
+        .catch(() => "");
+      throw new Error(
+        `${this.name}: load failed (HTTP ${res.status})${detail ? ` — ${detail}` : ""}`,
+      );
     }
     const body = (await res.json()) as { backup?: string | null };
     this.snap = body.backup

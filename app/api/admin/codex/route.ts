@@ -15,6 +15,21 @@ export const dynamic = "force-dynamic";
 const NO_STORE = { "Cache-Control": "no-store" } as const;
 
 /**
+ * Turn a seal/store failure (almost always a missing/short MNEMOSYNE_MASTER_KEY, or
+ * an unwritable MNEMOSYNE_CODEX_DIR) into a CLEAR 503 the codex-ui can surface —
+ * instead of an opaque 500 that reads as "load failed (HTTP 500)".
+ */
+function storageError(err: unknown): Response {
+  const detail = err instanceof Error ? err.message : String(err);
+  return Response.json(
+    {
+      error: `Mnemosyne codex storage is not ready on this server (${detail}). Set MNEMOSYNE_MASTER_KEY (base64 of 32 bytes) and a writable MNEMOSYNE_CODEX_DIR in the server env.`,
+    },
+    { status: 503, headers: NO_STORE },
+  );
+}
+
+/**
  * Ancient-gated custody of Mnemosyne's own sealed operator Codex.
  *
  * GET  → `{ initialized, password, backup }`. Provisions the machine codex
@@ -29,12 +44,16 @@ export async function GET(request: NextRequest) {
   const gate = await requireAncient(request);
   if (!gate.ok) return gate.response;
 
-  const password = await getOrCreateCodexPassword();
-  const backup = await loadBackup();
-  return Response.json(
-    { initialized: isInitialized(), password, backup },
-    { headers: NO_STORE },
-  );
+  try {
+    const password = await getOrCreateCodexPassword();
+    const backup = await loadBackup();
+    return Response.json(
+      { initialized: isInitialized(), password, backup },
+      { headers: NO_STORE },
+    );
+  } catch (err) {
+    return storageError(err);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -55,8 +74,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  await saveBackup(body.backup);
-  return Response.json({ ok: true, initialized: true }, { headers: NO_STORE });
+  try {
+    await saveBackup(body.backup);
+    return Response.json({ ok: true, initialized: true }, { headers: NO_STORE });
+  } catch (err) {
+    return storageError(err);
+  }
 }
 
 export async function DELETE(request: NextRequest) {

@@ -25,6 +25,14 @@ export async function GET(request: NextRequest) {
   const gate = await requireAncient(request);
   if (!gate.ok) return gate.response;
 
-  const password = await getOrCreateCodexPassword();
-  return Response.json({ ok: true, password }, { headers: NO_STORE });
+  try {
+    const password = await getOrCreateCodexPassword();
+    return Response.json({ ok: true, password }, { headers: NO_STORE });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    return Response.json(
+      { ok: false, error: `codex storage not ready (${detail})` },
+      { status: 503, headers: NO_STORE },
+    );
+  }
 }

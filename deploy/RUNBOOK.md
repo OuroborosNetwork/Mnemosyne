@@ -38,12 +38,28 @@ mkdir -p /var/www/codex.ancientholdings.eu/app
 client secret, and **do not paste the filled command anywhere else**:
 
 ```bash
-cd /var/www/codex.ancientholdings.eu && printf 'OIDC_ISSUER=%s\nOIDC_CLIENT_ID=%s\nOIDC_CLIENT_SECRET=%s\nOIDC_REDIRECT_URI=%s\nSESSION_SECRET=%s\n' 'https://ancientholdings.eu' '6e93bb4a-6dc8-40dd-8e55-18575f64c17f' 'PASTE_ROTATED_SECRET' 'https://codex.ancientholdings.eu/admin/callback' "$(openssl rand -hex 32)" > .env.local && chmod 600 .env.local && echo "env ✓"
+cd /var/www/codex.ancientholdings.eu && printf 'OIDC_ISSUER=%s\nOIDC_CLIENT_ID=%s\nOIDC_CLIENT_SECRET=%s\nSESSION_SECRET=%s\nMNEMOSYNE_MASTER_KEY=%s\nMNEMOSYNE_CODEX_DIR=%s\n' 'https://ancientholdings.eu' '6e93bb4a-6dc8-40dd-8e55-18575f64c17f' 'PASTE_ROTATED_SECRET' "$(openssl rand -hex 32)" "$(openssl rand -base64 32)" '/var/www/codex.ancientholdings.eu/data/mnemosyne-codex' > .env.local && chmod 600 .env.local && mkdir -p data/mnemosyne-codex && echo "env ✓"
 ```
 
-This uses the **live** redirect (`https://codex.ancientholdings.eu/admin/callback`),
-which is the one you already registered with the hub — so no extra hub registration
-is needed for prod.
+Notes:
+- `OIDC_REDIRECT_URI` is **no longer needed** — the app derives the callback from the
+  request host (`https://codex.ancientholdings.eu/admin/callback` in prod), so there is
+  nothing per-env to keep in sync. The hub client `6e93bb4a…` must have that callback
+  registered.
+- **`MNEMOSYNE_MASTER_KEY`** (base64 of 32 random bytes) seals Mnemosyne's own operator
+  codex (Phase 4). It MUST be stable — rotating it makes an existing sealed codex
+  unreadable. Generate ONCE.
+- **`MNEMOSYNE_CODEX_DIR`** points the sealed codex store at the stable parent dir
+  (NOT `app/`, which the `--delete` deploy wipes every push). Create it (`mkdir -p`).
+
+To add these to an EXISTING `.env.local` without rewriting it (idempotent — keeps any
+existing master key so a provisioned codex still opens):
+```bash
+cd /var/www/codex.ancientholdings.eu
+grep -q '^MNEMOSYNE_MASTER_KEY=' .env.local || printf 'MNEMOSYNE_MASTER_KEY=%s\n' "$(openssl rand -base64 32)" >> .env.local
+grep -q '^MNEMOSYNE_CODEX_DIR='  .env.local || echo 'MNEMOSYNE_CODEX_DIR=/var/www/codex.ancientholdings.eu/data/mnemosyne-codex' >> .env.local
+mkdir -p data/mnemosyne-codex && pm2 reload mnemosyne
+```
 
 ## D. VPS: place the pm2 config
 
