@@ -1,0 +1,6 @@
+# Host deployer scripts + systemd units run on Linux — they MUST check out with LF
+# regardless of the committer's OS, or bash chokes on a CR in the shebang/commands.
+*.sh              text eol=lf
+deploy/host/*.path    text eol=lf
+deploy/host/*.service text eol=lf
+deploy/host/*.conf    text eol=lf
