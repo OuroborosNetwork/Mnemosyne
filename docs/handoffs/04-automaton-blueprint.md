@@ -204,6 +204,31 @@ Mnemosyne `lib/codex-dropin/MnemosyneServerCodexAdapter.ts` + `app/admin/codex/M
 (the hub's `CodexDropIn` pattern). Empty on first open → the ancient populates it on the spot
 → real-time sealed save. No upload.
 
+### 7a. Portability: download + load-and-adopt (server-custody re-key)
+
+A server-custody codex is sealed under the master key and encrypted at the inner layer under a
+**machine-generated password the operator never sees**. So the plain codex Export/Load flow
+(which preserves the current password) is not directly usable — both directions need a
+**re-key**. Two ancient-gated flows:
+- **Download** — prompt a new password (twice) → re-key the snapshot *machine-pw → the new
+  password* → `exportForCloud` → the operator downloads a portable codex encrypted under a
+  password THEY chose. The live codex is untouched.
+- **Load-and-adopt** — pick a foreign codex + its password → re-key *file-pw → machine-pw* →
+  `saveAll` (re-sealed under the master key). The loaded codex is adopted into server custody
+  and auto-unlocks as usual. It **replaces** the current codex → gate behind a clear confirm +
+  suggest a Download first.
+- Do the re-key **server-side** (Node) so the master key + machine password never leave the
+  server; only the passwords the operator types travel (over TLS).
+
+**The re-key primitive belongs in the codex package, NOT the automaton.** Re-encrypting the
+snapshot's secret fields is a pure `snapshot→snapshot` transform, but the field inventory
+(kadena seeds, ouro accounts, pure keypairs, foreign keys, the CodexID halves) must stay in
+lockstep with the codex snapshot shape — an inline copy silently misses a new secret field on a
+future codex upgrade → a rotation that leaves it under the old password = unusable. Consume the
+package's `rekeyCodex(snapshot, oldPw, newPw)`; the cipher itself is `@stoachain/stoa-core/crypto`
+(`smartDecrypt`/`encryptStringV2`). See `07-codex-rekey-primitive.md` (the request to the codex
+package) — **pending that primitive**; the automaton side is just the two thin endpoints + UI.
+
 ---
 
 ## 8. Pythia credentials (wired into the codex; persistent; embeddable)
