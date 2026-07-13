@@ -259,3 +259,39 @@
   color: var(--admin-gold);
   border-color: #b8860b66;
 }
+
+/* Installed → available badge pair on a constructor row. */
+.mnemo-admin-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mnemo-admin-arrow {
+  color: var(--admin-text-dim);
+  font-size: 0.8rem;
+}
+
+/* Deploy confirm step + its button row. */
+.mnemo-admin-confirm {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--admin-surface-2);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+
+.mnemo-admin-btnrow {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+/* Live deploy terminal — a taller, monospace-forward log. */
+.mnemo-admin-term {
+  max-height: 340px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: #cdb98a;
+}

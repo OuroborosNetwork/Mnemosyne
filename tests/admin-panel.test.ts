@@ -103,7 +103,7 @@ describe("admin — Pythia connector control (REQ-10)", () => {
   });
 });
 
-describe("admin — Update Constructors control (REQ-09, REVIEW M5/M6)", () => {
+describe("admin — Update Constructors: single Deploy button (REQ-09, REVIEW M5/M6)", () => {
   const panel = () =>
     read("app", "admin", "update-constructors", "UpdateConstructorsPage.client.tsx");
 
@@ -112,27 +112,60 @@ describe("admin — Update Constructors control (REQ-09, REVIEW M5/M6)", () => {
     expect(panel()).toMatch(/AdminGate/);
   });
 
-  it("bundles both the codex and khronoton updater sections", () => {
-    expect(panel()).toMatch(/UpdateCodexSection/);
-    expect(panel()).toMatch(/UpdateKhronotonSection/);
+  it("is ONE unified Deploy panel — the two separate updater sections are gone", () => {
+    expect(panel()).toMatch(/DeployPanel/);
+    // The old per-constructor buttons/sections must not come back.
+    expect(panel()).not.toMatch(/UpdateCodexSection/);
+    expect(panel()).not.toMatch(/UpdateKhronotonSection/);
   });
 
-  it("POSTs to the ancient-gated update-codex route (moved verbatim)", () => {
-    expect(panel()).toMatch(/\/api\/admin\/update-codex/);
+  it("triggers the deploy + streams progress via the ancient-gated deploy routes", () => {
+    expect(panel()).toMatch(/\/api\/admin\/deploy/);
+    expect(panel()).toMatch(/\/api\/admin\/deploy\/stream\//);
+    expect(panel()).toMatch(/EventSource/);
   });
 
-  it("surfaces the current codex-ui version passed from the server page", () => {
-    expect(read("app", "admin", "update-constructors", "page.tsx")).toMatch(
+  it("reads all constructor versions from /api/admin/deploy (no server-passed version prop)", () => {
+    // The page no longer reads a version server-side; the client fetches the whole
+    // constructors status (installed vs npm-latest) from the deploy status endpoint.
+    expect(read("app", "admin", "update-constructors", "page.tsx")).not.toMatch(
       /readCodexUiVersion/,
     );
-    expect(panel()).toMatch(/codexVersion/);
+    expect(panel()).toMatch(/anyUpdateAvailable/);
   });
 
-  it("scaffolds the Khronoton updater against the new version endpoint, disabled until wired", () => {
-    expect(panel()).toMatch(/\/api\/admin\/khronoton-version/);
+  it("still surfaces Khronoton as an unwired preview that references the handoff", () => {
     expect(panel()).toMatch(/@ancientpantheon\/khronoton-core/);
-    expect(panel()).toMatch(/Khronoton not yet wired/);
     expect(panel()).toMatch(/03-khronoton-automaton-package\.md/);
+    expect(panel()).toMatch(/not wired/i);
+  });
+});
+
+describe("deploy pipeline — spool + status routes (source contract)", () => {
+  it("the trigger route is ancient-gated and branches dev-pull vs host-signal by deployMode", () => {
+    const route = read("app", "api", "admin", "deploy", "route.ts");
+    expect(route).toMatch(/requireAncient/);
+    expect(route).toMatch(/deployRequestPath/); // live: signal the host deployer
+    expect(route).toMatch(/startDevDeploy/); // dev: pull @latest in-process
+  });
+
+  it("the SSE stream route is ancient-gated and validates the deploy id (traversal guard)", () => {
+    const route = read("app", "api", "admin", "deploy", "stream", "[id]", "route.ts");
+    expect(route).toMatch(/requireAncient/);
+    expect(route).toMatch(/isValidDeployId/);
+    expect(route).toMatch(/text\/event-stream/);
+  });
+
+  it("ships the host-side blue-green deployer + systemd watcher units", () => {
+    for (const f of [
+      "mnemosyne-deploy.sh",
+      "mnemosyne-deploy-scan.sh",
+      "mnemosyne-deploy.path",
+      "mnemosyne-deploy.service",
+      "install-host-deployer.sh",
+    ]) {
+      expect(existsSync(join(root, "deploy", "host", f))).toBe(true);
+    }
   });
 });
 

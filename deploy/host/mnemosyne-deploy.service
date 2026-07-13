@@ -1,0 +1,14 @@
+# Runs the blue-green deployer for every pending request in the spool. Triggered by
+# mnemosyne-deploy.path (never enabled directly). Runs as root because it builds
+# images, manages containers, and reloads nginx — the privileged half of the deploy
+# that the unprivileged app container is deliberately kept out of.
+[Unit]
+Description=Mnemosyne on-box blue-green deploy
+After=docker.service network-online.target
+Wants=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mnemosyne/deploy/host/mnemosyne-deploy-scan.sh
+# Give a build + image pull room; blue-green health-check is bounded inside the script.
+TimeoutStartSec=1800

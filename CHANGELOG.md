@@ -9,6 +9,30 @@ See [docs/RELEASING.md](docs/RELEASING.md) for the release procedure.
 The running version is shown on the landing header (`v{{MNEMOSYNE_VERSION}}`), read
 from `package.json`.
 
+## [0.3.2] — 2026-07-13
+
+### Added
+- **Single Deploy button (Update Constructors).** The two separate "Update Codex" /
+  "Update Khronoton" sections are replaced by one **Constructors** status table plus a
+  single **Deploy** button that "comes alive" (primary) when any wired constructor has
+  a newer npm version, and always allows a manual re-deploy. Progress streams live into
+  an in-page terminal over SSE (`/api/admin/deploy/stream/<id>`).
+- **On-box, zero-downtime deploy (live).** The running container can't rebuild itself
+  and holds no Docker/nginx power, so a live Deploy drops a request in the deploy spool
+  (`lib/deploy/spool.ts`); a privileged **host deployer** (`deploy/host/`) does a
+  blue-green rebuild+swap (build new image → start the other color on the other port →
+  health-check → flip the nginx upstream → drop the old color) and streams its log back
+  through the shared volume. Installed once via `deploy/host/install-host-deployer.sh`
+  (systemd path-unit watcher + nginx upstream include). The site stays up throughout.
+- **Dev deploy path.** On localhost, Deploy pulls the constructors at `@latest`
+  in-process and streams npm's output into the same terminal; reload picks up the build.
+
+### Notes
+- **Khronoton is not wired yet.** Only the logic-only `@ancientpantheon/khronoton-core`
+  is published; the plug-and-play `khronoton-server`/`khronoton-ui` packages
+  (docs/handoffs/03) don't exist. Khronoton shows as a preview and joins the single
+  Deploy button — no separate button — once its package ships.
+
 ## [0.3.1] — 2026-07-13
 
 ### Fixes

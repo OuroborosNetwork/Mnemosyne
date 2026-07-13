@@ -1,0 +1,12 @@
+# Watches the deploy spool for a request file dropped by the Mnemosyne container
+# (POST /api/admin/deploy) and starts mnemosyne-deploy.service to process it.
+# Install: copy to /etc/systemd/system/, then `systemctl enable --now mnemosyne-deploy.path`.
+[Unit]
+Description=Watch Mnemosyne deploy spool for on-box deploy requests
+
+[Path]
+PathExistsGlob=/var/www/codex.ancientholdings.eu/data/deploy/*.request.json
+Unit=mnemosyne-deploy.service
+
+[Install]
+WantedBy=multi-user.target

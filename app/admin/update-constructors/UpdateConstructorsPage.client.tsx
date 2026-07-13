@@ -1,166 +1,229 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactElement } from "react";
 
 import { AdminGate } from "../AdminGate.client";
 
-interface RebuildResult {
-  ok: boolean;
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-  command: string;
-  note: string;
-  versionBefore: string;
-  versionAfter: string;
-  changed: boolean;
-}
-
-/** `/api/admin/codex-version` payload. */
-interface CodexVersionInfo {
+/** One constructor row from `/api/admin/deploy` (GET). */
+interface ConstructorStatus {
+  key: "codex" | "khronoton";
+  label: string;
+  npmPackage: string;
   installed: string;
   available: string | null;
-  updateAvailable: boolean;
-  /** "bundle" = live standalone (update via redeploy); "dev" = localhost (pull works). */
-  deployMode?: "bundle" | "dev";
-}
-
-/** `/api/admin/khronoton-version` payload. */
-interface KhronotonVersionInfo {
-  installed: string;
-  available: string | null;
-  updateAvailable: boolean;
-  /** false until the Khronoton package is wired into Mnemosyne. */
   wired: boolean;
+  updateAvailable: boolean;
+}
+
+interface ConstructorsStatus {
+  constructors: ConstructorStatus[];
+  anyUpdateAvailable: boolean;
+  deployMode: "bundle" | "dev";
+}
+
+type Phase = "idle" | "arming" | "running" | "success" | "failed";
+
+/** Status badge for one constructor (installed + npm-latest, wired-aware). */
+function ConstructorRow({ c }: { c: ConstructorStatus }): ReactElement {
+  const availLabel = c.available ? `v${c.available}` : "unreachable";
+  return (
+    <li>
+      <span className="mnemo-admin-chain">
+        {c.label} · <code>{c.npmPackage}</code>
+      </span>
+      <span className="mnemo-admin-badges">
+        <span
+          className={`mnemo-admin-badge${c.wired ? " mnemo-admin-badge--live" : ""}`}
+          title="Installed in this build"
+        >
+          {c.wired ? `v${c.installed}` : "not wired"}
+        </span>
+        <span className="mnemo-admin-arrow">→</span>
+        <span
+          className={`mnemo-admin-badge${c.updateAvailable ? "" : " mnemo-admin-badge--live"}`}
+          title="Latest on npm"
+        >
+          {availLabel}
+        </span>
+      </span>
+    </li>
+  );
 }
 
 /**
- * Update Codex: shows the INSTALLED `@ancientpantheon/codex` version alongside the
- * latest AVAILABLE version on npm, and pulls `@latest` on demand. The version pair
- * is fetched live from `/api/admin/codex-version` (and re-fetched after a pull) so
- * the operator can see whether an update exists before clicking. Never restarts the
- * server — see the note the server action returns.
+ * Update Constructors — the single Deploy surface. One status table shows every
+ * constructor (Codex is wired; Khronoton is a preview until its package ships), and
+ * ONE Deploy button rebuilds the automaton. The button "comes alive" (primary,
+ * enabled-with-emphasis) when any wired constructor has a newer npm version, but a
+ * manual re-deploy is always allowed (e.g. to pick up code changes). Progress streams
+ * live into the terminal below over SSE.
+ *
+ * - Live (`bundle`): the on-box host deployer does a zero-downtime blue-green rebuild.
+ * - Localhost (`dev`): pulls the constructors at `@latest`; reload picks them up.
  */
-function UpdateCodexSection({ codexVersion }: { codexVersion: string }): ReactElement {
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<RebuildResult | null>(null);
+function DeployPanel(): ReactElement {
+  const [status, setStatus] = useState<ConstructorsStatus | null>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [log, setLog] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<CodexVersionInfo | null>(null);
+  const esRef = useRef<EventSource | null>(null);
+  const termRef = useRef<HTMLPreElement | null>(null);
 
-  const loadVersions = useCallback(async () => {
+  const loadStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/codex-version", { cache: "no-store" });
-      if (res.ok) setInfo((await res.json()) as CodexVersionInfo);
+      const res = await fetch("/api/admin/deploy", { cache: "no-store" });
+      if (res.ok) setStatus((await res.json()) as ConstructorsStatus);
     } catch {
-      /* leave info null → fall back to the installed prop only */
+      /* leave null → "checking…" */
     }
   }, []);
 
   useEffect(() => {
-    void loadVersions();
-  }, [loadVersions]);
+    void loadStatus();
+    return () => esRef.current?.close();
+  }, [loadStatus]);
 
-  const run = useCallback(async () => {
-    setBusy(true);
+  // Auto-scroll the terminal as lines arrive.
+  useEffect(() => {
+    if (termRef.current) termRef.current.scrollTop = termRef.current.scrollHeight;
+  }, [log]);
+
+  const openStream = useCallback(
+    (id: string) => {
+      esRef.current?.close();
+      const es = new EventSource(`/api/admin/deploy/stream/${id}`);
+      esRef.current = es;
+      // Each (re)connection resends the log from offset 0 (survives a container
+      // swap), so reset the buffer on open to avoid duplicated lines.
+      es.onopen = () => setLog("");
+      es.onmessage = (ev) => setLog((prev) => prev + ev.data + "\n");
+      es.addEventListener("status", (ev) => {
+        const s = (ev as MessageEvent).data as string;
+        if (s === "running") setPhase("running");
+      });
+      es.addEventListener("done", (ev) => {
+        const s = (ev as MessageEvent).data as string;
+        es.close();
+        setPhase(s === "success" ? "success" : "failed");
+        void loadStatus();
+      });
+      es.onerror = () => {
+        // Not terminal → the browser will auto-reconnect (e.g. mid-swap). If it's
+        // actually dead the phase stays "running"; the operator can reload.
+      };
+    },
+    [loadStatus],
+  );
+
+  const startDeploy = useCallback(async () => {
     setError(null);
-    setResult(null);
+    setLog("");
+    setPhase("running");
     try {
-      const res = await fetch("/api/admin/update-codex", { method: "POST" });
-      setResult((await res.json()) as RebuildResult);
-      void loadVersions(); // refresh installed/available after the pull
+      const res = await fetch("/api/admin/deploy", { method: "POST" });
+      if (!res.ok) {
+        setError(`Deploy request failed (HTTP ${res.status}).`);
+        setPhase("failed");
+        return;
+      }
+      const { id } = (await res.json()) as { id: string };
+      openStream(id);
     } catch {
-      setError("Update request failed — network error.");
-    } finally {
-      setBusy(false);
+      setError("Deploy request failed — network error.");
+      setPhase("failed");
     }
-  }, [loadVersions]);
+  }, [openStream]);
 
-  const installed = info?.installed ?? codexVersion;
-  const available = info?.available ?? null;
-  const updateAvailable = info?.updateAvailable ?? false;
-  // On the live standalone bundle, codex is compiled in — an in-app pull can't
-  // change the running app, so the update path is a redeploy. Only offer the real
-  // pull on localhost (dev).
-  const isBundle = info?.deployMode === "bundle";
+  const isBundle = status?.deployMode === "bundle";
+  const anyUpdate = status?.anyUpdateAvailable ?? false;
+  const busy = phase === "running";
+
+  const buttonLabel =
+    phase === "running"
+      ? "Deploying…"
+      : anyUpdate
+        ? "Deploy update"
+        : "Re-deploy";
 
   return (
     <section className="mnemo-admin-card">
-      <h2 className="mnemo-admin-h2">Update Codex</h2>
+      <h2 className="mnemo-admin-h2">Constructors</h2>
       <ul className="mnemo-admin-chainlist">
-        <li>
-          <span className="mnemo-admin-chain">
-            Installed · <code>@ancientpantheon/codex</code>
-          </span>
-          <span className="mnemo-admin-badge mnemo-admin-badge--live">v{installed}</span>
-        </li>
-        <li>
-          <span className="mnemo-admin-chain">Latest on npm</span>
-          <span
-            className={`mnemo-admin-badge${updateAvailable ? "" : " mnemo-admin-badge--live"}`}
-          >
-            {available ? `v${available}` : info ? "unreachable" : "checking…"}
-          </span>
-        </li>
+        {status ? (
+          status.constructors.map((c) => <ConstructorRow key={c.key} c={c} />)
+        ) : (
+          <li>
+            <span className="mnemo-admin-chain">Checking constructors…</span>
+          </li>
+        )}
       </ul>
+
       <p className="mnemo-admin-muted">
-        {available === null
-          ? info
-            ? "Couldn't reach npm to check for updates."
-            : "Checking npm for the latest version…"
-          : updateAvailable
-            ? `Update available — v${installed} → v${available}.`
-            : `Up to date — running the latest published codex (v${installed}).`}
+        {status == null
+          ? "Reading installed versions and checking npm…"
+          : anyUpdate
+            ? "An update is available. Deploy rebuilds the automaton with the latest constructors."
+            : "All wired constructors are up to date. You can still re-deploy to pick up code changes."}
       </p>
-      {isBundle ? (
-        <p className="mnemo-admin-muted">
-          This is the live build — codex is compiled into the deployed bundle, so it
-          updates on <strong>redeploy</strong> (push to <code>main</code>; CI rebuilds
-          against the latest npm version), not from a button here. The versions above
-          tell you when a redeploy is worth it.
-        </p>
+      <p className="mnemo-admin-muted">
+        {isBundle
+          ? "Live build — Deploy runs an on-box, zero-downtime rebuild (blue-green swap). Progress streams below; the site stays up throughout."
+          : "Localhost — Deploy pulls the constructors at @latest; reload the page afterwards to pick them up."}
+      </p>
+
+      {phase === "arming" ? (
+        <div className="mnemo-admin-confirm">
+          <p className="mnemo-admin-status">
+            Confirm: rebuild and redeploy the automaton now?
+          </p>
+          <div className="mnemo-admin-btnrow">
+            <button
+              type="button"
+              className="mnemo-admin-btn mnemo-admin-btn--primary"
+              onClick={() => void startDeploy()}
+            >
+              Yes, deploy
+            </button>
+            <button
+              type="button"
+              className="mnemo-admin-btn"
+              onClick={() => setPhase("idle")}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       ) : (
         <button
           type="button"
-          className="mnemo-admin-btn mnemo-admin-btn--primary"
+          className={`mnemo-admin-btn ${anyUpdate ? "mnemo-admin-btn--primary" : ""}`}
           disabled={busy}
-          onClick={() => void run()}
+          onClick={() => setPhase("arming")}
         >
-          {busy
-            ? "Pulling latest codex…"
-            : updateAvailable
-              ? `Update to v${available}`
-              : "Re-pull latest"}
+          {buttonLabel}
         </button>
       )}
+
       {error ? (
         <p className="mnemo-admin-status" role="alert">
           {error}
         </p>
       ) : null}
-      {result ? (
+
+      {phase === "running" || phase === "success" || phase === "failed" ? (
         <div className="mnemo-admin-result">
           <p className="mnemo-admin-status">
-            {result.ok
-              ? result.changed
-                ? `✓ Pull complete — codex updated ${result.versionBefore} → ${result.versionAfter}`
-                : `✓ Pull complete — already on the latest codex (${result.versionAfter}); nothing to update`
-              : `✗ Pull failed (exit ${result.exitCode})`}
+            {phase === "running"
+              ? "▶ Deploy in progress…"
+              : phase === "success"
+                ? "✓ Deploy complete."
+                : "✗ Deploy failed — see the log."}
           </p>
-          <p className="mnemo-admin-muted">
-            <code>{result.command}</code>
-          </p>
-          {result.ok && result.changed ? (
-            <p className="mnemo-admin-muted">
-              Reload to pick up the new build (dev). On the live site, redeploy to
-              rebuild the bundle against the new version.
-            </p>
-          ) : null}
-          <p className="mnemo-admin-muted">{result.note}</p>
-          {result.stderr ? (
-            <pre className="mnemo-admin-log">{result.stderr}</pre>
-          ) : null}
-          {result.stdout ? (
-            <pre className="mnemo-admin-log">{result.stdout}</pre>
+          <pre className="mnemo-admin-log mnemo-admin-term" ref={termRef}>
+            {log || "Waiting for the deployer…"}
+          </pre>
+          {phase === "success" && !isBundle ? (
+            <p className="mnemo-admin-muted">Reload the page to run the new build.</p>
           ) : null}
         </div>
       ) : null}
@@ -169,77 +232,33 @@ function UpdateCodexSection({ codexVersion }: { codexVersion: string }): ReactEl
 }
 
 /**
- * Update Khronoton (SCAFFOLD): the same installed-vs-available shape as
- * {@link UpdateCodexSection}, but for the future `@ancientpantheon/khronoton-core`
- * automaton engine. Khronoton is NOT wired into Mnemosyne yet, so `/api/admin/
- * khronoton-version` reports `installed: "not wired"` and `wired: false`; we still
- * show the latest-on-npm version as a preview so the operator can see the package
- * is taking shape. The Update button stays disabled until the package is wired in.
+ * Khronoton preview (SCAFFOLD): Khronoton is NOT wired into Mnemosyne yet — only the
+ * logic-only `@ancientpantheon/khronoton-core` is published; the plug-and-play
+ * `khronoton-server`/`khronoton-ui` packages (docs/handoffs/03) don't exist yet. Once
+ * they ship and Mnemosyne takes the dependency, Khronoton joins the Deploy panel above
+ * as a wired constructor and this note goes away.
  */
-function UpdateKhronotonSection(): ReactElement {
-  const [info, setInfo] = useState<KhronotonVersionInfo | null>(null);
-
-  const loadVersions = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/khronoton-version", { cache: "no-store" });
-      if (res.ok) setInfo((await res.json()) as KhronotonVersionInfo);
-    } catch {
-      /* leave info null → the "checking…" placeholder stays */
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadVersions();
-  }, [loadVersions]);
-
-  const installed = info?.installed ?? "not wired";
-  const available = info?.available ?? null;
-
+function KhronotonPreview(): ReactElement {
   return (
     <section className="mnemo-admin-card">
-      <h2 className="mnemo-admin-h2">Update Khronoton</h2>
-      <ul className="mnemo-admin-chainlist">
-        <li>
-          <span className="mnemo-admin-chain">
-            Installed · <code>@ancientpantheon/khronoton-core</code>
-          </span>
-          <span className="mnemo-admin-badge">{installed}</span>
-        </li>
-        <li>
-          <span className="mnemo-admin-chain">Latest on npm</span>
-          <span className="mnemo-admin-badge mnemo-admin-badge--live">
-            {available ? `v${available}` : info ? "unreachable" : "checking…"}
-          </span>
-        </li>
-      </ul>
+      <h2 className="mnemo-admin-h2">Khronoton (coming soon)</h2>
       <p className="mnemo-admin-muted">
-        The Khronoton engine isn&apos;t wired into Mnemosyne yet — the{" "}
-        <code>@ancientpantheon/khronoton-core</code> package is being built into a
-        plug-and-play automaton engine (see{" "}
-        <code>docs/handoffs/03-khronoton-automaton-package.md</code>). This panel will
-        pull + wire it once the package is ready.
+        The Khronoton engine isn&apos;t wired into Mnemosyne yet. Only the logic-only{" "}
+        <code>@ancientpantheon/khronoton-core</code> is on npm; the plug-and-play
+        automaton package (see{" "}
+        <code>docs/handoffs/03-khronoton-automaton-package.md</code>) is still being
+        built. Once it ships, Khronoton appears as a wired constructor above and the
+        single Deploy button rebuilds it alongside Codex — no separate button.
       </p>
-      <button
-        type="button"
-        className="mnemo-admin-btn mnemo-admin-btn--primary"
-        disabled
-        title="Khronoton not yet wired"
-      >
-        Update Khronoton
-      </button>
     </section>
   );
 }
 
-export function UpdateConstructorsPage({
-  codexVersion,
-}: {
-  codexVersion: string;
-}): ReactElement {
+export function UpdateConstructorsPage(): ReactElement {
   return (
     <AdminGate title="Update Constructors">
-      <UpdateCodexSection codexVersion={codexVersion} />
-      <UpdateKhronotonSection />
+      <DeployPanel />
+      <KhronotonPreview />
     </AdminGate>
   );
 }

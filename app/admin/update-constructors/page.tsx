@@ -1,13 +1,11 @@
 import type { ReactElement } from "react";
 
-import { readCodexUiVersion } from "@/lib/codexVersion";
-
 import { UpdateConstructorsPage } from "./UpdateConstructorsPage.client";
 
-// Ancient-gated Update Constructors page. Reads the installed codex-ui version
-// server-side (a server-only fs read) and hands it to the client control, which does
-// the live /api/me gate + the interactive version check / pull. Groups the codex
-// updater with the (scaffolded) Khronoton engine updater.
+// Ancient-gated Update Constructors page. The client control does the live /api/me
+// gate and reads all constructor versions (installed vs npm-latest) from
+// /api/admin/deploy, so nothing is read server-side here. The single Deploy button
+// rebuilds the automaton (on-box blue-green on live; npm pull on dev).
 export const dynamic = "force-dynamic";
 
 export const metadata = {
@@ -15,5 +13,5 @@ export const metadata = {
 };
 
 export default function Page(): ReactElement {
-  return <UpdateConstructorsPage codexVersion={readCodexUiVersion()} />;
+  return <UpdateConstructorsPage />;
 }
