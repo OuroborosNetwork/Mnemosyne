@@ -31,22 +31,26 @@
 }
 .lp-pages {
   height: 100%;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .lp-pages {
-    transition: none;
-  }
+  /* The page-turn slide is animated in JS (Web Animations API in app/page.tsx) off the
+     inline pixel transform, NOT a CSS transition — a CSS transition on this transform
+     gets stuck at 0 under the height:100% flex chain and the deck never moves. The
+     inline `transform` here is the resting position; reduced-motion is honoured in JS. */
 }
 .lp-page {
   height: 100%;
-  /* overflow-y is the safety valve when a page is taller than the stage (short
-     viewport). `safe center` centres a page that fits but aligns to the start when it
-     overflows, so the top is never clipped out of scroll reach. */
+  /* border-box so height:100% INCLUDES the padding — each page is exactly the stage
+     height, so translateY(-index*100%) lands each page flush at the top. Without it the
+     padding makes pages taller than the stage and every page drifts progressively
+     lower. */
+  box-sizing: border-box;
+  /* Top-aligned: a topic's heading sits at the top of the stage (not centred mid-page).
+     overflow-y is the safety valve when a page is taller than the stage (short
+     viewport) — from flex-start the top is always the first thing shown and scroll
+     reveals the rest. */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: safe center;
+  justify-content: flex-start;
   padding: 2.5rem 24px;
 }
 .lp-page-inner {

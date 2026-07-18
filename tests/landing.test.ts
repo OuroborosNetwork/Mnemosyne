@@ -51,13 +51,17 @@ describe("React landing route", () => {
     expect(src).toMatch(/href:\s*["']\/codex["']|href=["']\/codex["']/);
   });
 
-  it("mounts the fixed-stage page-turn deck (stage + translating pages layer) so one topic shows at a time", () => {
+  it("mounts the fixed-stage page-turn deck, sliding via the Web Animations API (not a CSS transition)", () => {
     const src = page();
-    // The deck scaffold: the stage clips, the pages layer translates.
+    // The deck scaffold: the stage clips, the pages layer translates by -index*100%
+    // (self-measuring — exact with border-box pages, so a topic lands flush at the top).
     expect(src).toMatch(/lp-stage/);
     expect(src).toMatch(/lp-pages/);
-    // The pages layer is driven by the current index via a transform.
-    expect(src).toMatch(/translateY/);
+    expect(src).toMatch(/translateY\(-\$\{[^}]*100[^}]*\}%\)/);
+    // The slide runs imperatively (WAAPI) — a CSS `transition` on this transform gets
+    // stuck at 0 under the height:100% flex chain, so the deck never actually moves.
+    expect(src).toMatch(/\.animate\(/);
+    expect(css()).not.toMatch(/\.lp-pages\s*\{[^}]*transition\s*:/);
   });
 
   it("wires the hard page-turn input handlers so wheel/keys/touch advance exactly one page", () => {
@@ -69,6 +73,26 @@ describe("React landing route", () => {
     expect(src).toMatch(/["']keydown["']/);
     expect(src).toMatch(/["']touchstart["']/);
     expect(src).toMatch(/["']touchend["']/);
+  });
+
+  it("top-aligns each page so a topic sits at the top of the stage, not centred mid-page", () => {
+    // Regression: `justify-content: center`/`safe center` parks a short topic in the
+    // middle of the stage with a gap above the heading. A topic must start at the top.
+    const pageBlock = css().match(/\.lp-page\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(pageBlock).toMatch(/justify-content:\s*flex-start/);
+    expect(pageBlock).not.toMatch(/justify-content:\s*(safe\s+)?center/);
+    // border-box is load-bearing: with height:100% + padding under content-box each
+    // page renders taller than the stage, so translateY(-index*100%) drifts every page
+    // progressively lower and higher topics land far below the stage top.
+    expect(pageBlock).toMatch(/box-sizing:\s*border-box/);
+  });
+
+  it("resets the shown page to its top on navigation so the topic heading is at the top", () => {
+    // Jumping to a topic (Tier-1/Tier-2/scroll) must show it from the start, even if
+    // that page had been scrolled before — the deck resets scrollTop on pageIndex change.
+    const src = page();
+    expect(src).toMatch(/scrollTop\s*=\s*0/);
+    expect(src).toMatch(/\[pageIndex\]/);
   });
 
   it("keeps the fixed-stage deck mechanism in CSS (else it degrades to a long scroll)", () => {
