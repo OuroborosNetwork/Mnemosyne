@@ -9,6 +9,18 @@ See [docs/RELEASING.md](docs/RELEASING.md) for the release procedure.
 The running version is shown on the landing header (`v{{MNEMOSYNE_VERSION}}`), read
 from `package.json`.
 
+## [0.6.1] — 2026-07-17
+
+### Fixed
+- **Docker build compiles better-sqlite3 on Alpine** (the 0.6.0 Khronoton engine's
+  store). better-sqlite3 ships no musl prebuild, so the `deps` stage now installs the
+  `python3`/`make`/`g++` toolchain to build it from source — without which the
+  optional dep was silently skipped and the engine would fail at container boot. The
+  toolchain lives only in the discarded multi-stage layer (the runtime image stays
+  slim); the runtime image adds `libstdc++` for the compiled addon, and the standalone
+  stage copies `better-sqlite3` + `bindings` + `file-uri-to-path` in explicitly so the
+  `createRequire` load always resolves the native binary. No app-code change.
+
 ## [0.6.0] — 2026-07-17
 
 ### Added
